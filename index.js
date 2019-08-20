@@ -28,10 +28,12 @@ app.get('/employees' , (req, res) =>{
     mysqlConn.query('SELECT * FROM EMPLOYEE', (err, rows, fields)=>{
         if(!err){
             console.log( rows);
-            res.send(rows);
+            res.status(200).send(rows);
         }        
-        else
-        console.log(err);
+        else{
+            es.status(400).send('Errror ', err);
+        }
+        
     });
 });
 
@@ -40,10 +42,12 @@ app.get('/employees/:id' , (req, res) =>{
     mysqlConn.query('SELECT * FROM EMPLOYEE WHERE ID_EMP = ?', [req.params.id], (err, rows, fields)=>{
         if(!err){
             console.log( rows);
-            res.send(rows);
+            res.status(200).send(rows);
         }        
-        else
-        console.log(err);
+        else{
+            console.log(err);
+            res.status(400).send(rows);
+        }
     });
 });
 
@@ -52,10 +56,12 @@ app.delete('/employees/:id' , (req, res) =>{
     mysqlConn.query('DELETE FROM EMPLOYEE WHERE ID_EMP = ?', [req.params.id], (err, rows, fields)=>{
         if(!err){
             console.log( rows);
-            res.send(rows);
+            res.status(200).send(rows);
         }        
-        else
-        console.log(err);
+        else{
+            console.log(err);
+            res.status(400).send('Errror ', err);
+        }
     });
 });
 
@@ -65,13 +71,19 @@ app.post('/employees', (req, res) => {
     var sql = "SET @ID_EMP = ?;SET @NAME = ?;SET @EMP_CODE  = ?;SET @SALARY = ?; \
     CALL EmployeeAddOrEdit(@ID_EMP ,@NAME ,@EMP_CODE ,@SALARY);";
     mysqlConn.query(sql, [emp.ID_EMP, emp.NAME, emp.EMP_CODE , emp.SALARY], (err, rows, fields) => {
-        if (!err)
+        if (!err){
             rows.forEach(element => {
-                if(element.constructor == Array)
-                res.send('Inserted employee id : '+element[0].ID_EMP);
+                if(element.constructor === Array){
+                    res.status(200).send('Inserted employee id : '+element[0].ID_EMP);
+                    console.log(element[0].ID_EMP);
+                }
             });
-        else
+        }   
+        else{
             console.log(err);
+            res.status(400).send('Errror ', err);
+        }
+            
     })
 });
 
@@ -82,8 +94,10 @@ app.put('/employees', (req, res) => {
     CALL EmployeeAddOrEdit(@ID_EMP ,@NAME ,@EMP_CODE ,@SALARY);";
     mysqlConn.query(sql, [emp.ID_EMP, emp.NAME, emp.EMP_CODE , emp.SALARY], (err, rows, fields) => {
         if (!err)
-            res.send('Updated successfully');
-        else
-            console.log(err);
+                res.status(200).send('Updated successfully');
+            else{
+                console.log(err);
+                res.status(400).send('Errror ', err);
+            }
     })
 });
