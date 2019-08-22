@@ -21,6 +21,16 @@ mysqlConn.connect(err=>{
     }
 });
 
+app.use(function(req, res, next) {
+
+    res.header("Access-Control-Allow-Origin", "*");
+  
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  
+    next();
+  
+  });
+
 app.listen(3000, () =>console.log(`App is running on port 3000`));
 
 //GET ALL EMPLOYEES
@@ -68,6 +78,7 @@ app.delete('/employees/:id' , (req, res) =>{
 //Insert an employees
 app.post('/employees', (req, res) => {
     let emp = req.body;
+    console.log(emp);
     var sql = "SET @ID_EMP = ?;SET @NAME = ?;SET @EMP_CODE  = ?;SET @SALARY = ?; \
     CALL EmployeeAddOrEdit(@ID_EMP ,@NAME ,@EMP_CODE ,@SALARY);";
     mysqlConn.query(sql, [emp.ID_EMP, emp.NAME, emp.EMP_CODE , emp.SALARY], (err, rows, fields) => {
