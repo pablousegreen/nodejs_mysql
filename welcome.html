@@ -27,16 +27,15 @@
 var crudApp = angular.module('crudApp', []);
 crudApp.factory("spaces", function($http) {
     var data = "";
-
-
+    
     function getUrl(callback) {
       var url = 'http://localhost:3000/employees';
-      console.log("LEts see all: ", url);
+      //console.log("LEts see all: ", url);
       //cachedData = data;    
       callback(url);
-    }
+    };
     
-    let datas = () => {
+    var datas = () => {
     	var url;
     	var dataResponse;
     	getUrl(function(urlback){
@@ -48,7 +47,7 @@ crudApp.factory("spaces", function($http) {
         	  method : 'GET'
     	  		}).then( function(response){
 	        	  if (response.data !== null) {
-	        		  console.log("response: ", response);
+	        		  //console.log("response: ", response);
 	        		  console.log("response.data: ", response.data);
 	        		  dataResponse =  response.data;
 	        	  } else {
@@ -56,16 +55,40 @@ crudApp.factory("spaces", function($http) {
 	        		  dataResponse =  response.data;
 	        	  }
     	  		});
+       // console.log("dataResponse: ", dataResponse);
         return dataResponse;
-    }
+    };
+    
+    function all(callback){
+    	var url;
+    	var dataResponse;
+    	getUrl(function(urlback){
+        	url = urlback;
+        });
+        console.log("LEts see all: ", url);
+        $http({
+        	  url : url,
+        	  method : 'GET'
+    	  		}).then( function(response){
+	        	  if (response.data !== null) {
+	        		  //console.log("response: ", response);
+	        		  console.log("response.data: ", response.data);
+	        		  dataResponse =  response.data;
+	        	  } else {
+	        		  console.log("else response.data: ", response.data);
+	        		  dataResponse =  response.data;
+	        	  }
+    	  		});
+       // console.log("dataResponse: ", dataResponse);
+        callback(dataResponse);
+    };
 
     return {
-      url: getUrl,
-      employeesResponse: datas,
+      url:getUrl,
+      datas: datas,
       setData: function(str) {
         data = str;
       },
-
       getData: function() {
         return data;
       }
@@ -75,9 +98,22 @@ crudApp.factory("spaces", function($http) {
 crudApp.controller("EmployeeListCtrl", function($scope, spaces) {
     //countries.setData("Im am set in first controller");
    //console.log("Url: ", spaces.url);
-    //console.log("EmployeeListCtrl: ", spaces);
-    console.log("employeesResponse: ", spaces);
-    //$scope.employees = spaces.employeesResponse();
+   $scope.all = [];
+   spaces.url(function(u){
+    	console.log("1: ", u);
+    });
+    spaces.datas(function(a){
+    	console.log("2: ", a);
+    	a.map(val =>{
+    		$scope.all.push(val);
+    	});
+    	$scope.employees = $scope.all;
+    	$scope.all.foreach(a=>{
+        	console.log(": ", a);
+        });
+    });
+   
+    
     
    /* $scope.saveEmployee = function() {
 		if ($scope.employee.id !== undefined) {
