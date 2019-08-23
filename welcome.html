@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CRUD Example</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+ <meta charset="utf-8" />
+ <title>Angular.js Example</title>
+ <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script>
+ <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular-route.min.js"></script>
+
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<script type="text/javascript">
+var crudApp = angular.module('crudApp', []);
+crudApp.factory("spaces", function($http) {
+    var data = "";
+
+
+    function getUrl(callback) {
+      var url = 'http://localhost:3000/employees';
+      console.log("LEts see all: ", url);
+      //cachedData = data;    
+      callback(url);
+    }
+    
+    let datas = () => {
+    	var url;
+    	var dataResponse;
+    	getUrl(function(urlback){
+        	url = urlback;
+        });
+        console.log("LEts see all: ", url);
+        $http({
+        	  url : url,
+        	  method : 'GET'
+    	  		}).then( function(response){
+	        	  if (response.data !== null) {
+	        		  console.log("response: ", response);
+	        		  console.log("response.data: ", response.data);
+	        		  dataResponse =  response.data;
+	        	  } else {
+	        		  console.log("else response.data: ", response.data);
+	        		  dataResponse =  response.data;
+	        	  }
+    	  		});
+        return dataResponse;
+    }
+
+    return {
+      url: getUrl,
+      employeesResponse: datas,
+      setData: function(str) {
+        data = str;
+      },
+
+      getData: function() {
+        return data;
+      }
+    };
+  });//spaces
+
+crudApp.controller("EmployeeListCtrl", function($scope, spaces) {
+    //countries.setData("Im am set in first controller");
+   //console.log("Url: ", spaces.url);
+    //console.log("EmployeeListCtrl: ", spaces);
+    console.log("employeesResponse: ", spaces);
+    //$scope.employees = spaces.employeesResponse();
+    
+   /* $scope.saveEmployee = function() {
+		if ($scope.employee.id !== undefined) {
+			Employee.update($scope.employee, function() {
+				$scope.employees = Employee.query();
+				$scope.employee = {};
+				$scope.buttonText="Submit";
+			});
+		} else {
+			Employee.save($scope.employee, function() {
+				$scope.employees = Employee.query();
+				$scope.employee = {};
+			});
+		}
+	}
+
+	$scope.updateEmployeeInit = function(employee) {
+		$scope.buttonText="Update";
+		$scope.employee = employee;
+	}
+
+	$scope.deleteEmployee = function(employee) {
+		employee.$delete({id: employee.id}, function() {
+			$scope.employees = Employee.query();
+		});
+	}*/
+    
+  });// EmployeeListCtrl
+</script>
+<body ng-app="crudApp" ng-controller="EmployeeListCtrl">
+
+	
+
+	<div class="panel panel-default">
+		<div class="panel-heading">Employees</div>
+		<div class="panel-body">
+			<!-- form class="col-md-4" ng-submit="saveEmployee()">
+				<div class="form-group">
+					<label for="employeeName">Employee Name</label> <input type="text"
+						ng-model="employee.name" class="form-control" id="employeeName"
+						placeholder="Employee Name">
+				</div>
+				<div class="form-group">
+					<label for="employeeSalary">Salary</label> <input type="text"
+						ng-model="employee.salary" class="form-control"
+						id="employeeSalary" placeholder="Salary">
+				</div>
+
+				<div class="form-group">
+					<label for="employeeDepartment">Department</label> 
+					<input type="text"
+						ng-model="employee.department" class="form-control"
+						id="employeeDepartment" placeholder="Department">
+				</div>
+
+				<button type="submit" class="btn btn-default">{{buttonText}}</button>
+				
+			</form-->
+
+			<div class="table-responsive col-md-6">
+				<table class="table table-striped">
+					<tr>
+						<th>Name</th>
+						<th>Salary</th>
+						<th>Department</th>
+						<th></th>
+					</tr>
+					<tr ng-repeat="employee in employees">
+						<td>{{employee.name}}</td>
+						<td>{{employee.salary}}</td>
+						<td>{{employee.department}}</td>
+						<td>
+							<button type="button" class="btn btn-default"
+								ng-click="updateEmployeeInit(employee)">
+								<span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+							</button>
+							<button type="button" class="btn btn-default"
+								ng-click="deleteEmployee(employee)">
+								<span class="glyphicon glyphicon-remove-circle"
+									aria-hidden="true"></span>
+							</button>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
