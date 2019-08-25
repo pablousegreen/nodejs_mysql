@@ -25,9 +25,8 @@ mysqlConn.connect(err=>{
 app.use(function(req, res, next) {
 
     res.header("Access-Control-Allow-Origin", "*");
-  
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  
+    res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
     next();
   
   });
@@ -36,7 +35,7 @@ app.listen(3000, () =>console.log(`App is running on port 3000`));
 
 //GET ALL EMPLOYEES
 app.get('/employees' , (req, res) =>{
-    mysqlConn.query('SELECT * FROM EMPLOYEE', (err, rows, fields)=>{
+    mysqlConn.query('SELECT ID_EMP AS id, NAME AS name, EMP_CODE as code, SALARY AS salary FROM EMPLOYEE', (err, rows, fields)=>{
         if(!err){
             console.log( rows);
             res.status(200).send(rows);
@@ -50,7 +49,7 @@ app.get('/employees' , (req, res) =>{
 
 //GET ALL EMPLOYEES/1
 app.get('/employees/:id' , (req, res) =>{
-    mysqlConn.query('SELECT * FROM EMPLOYEE WHERE ID_EMP = ?', [req.params.id], (err, rows, fields)=>{
+    mysqlConn.query('SELECT ID_EMP AS id, NAME AS name, EMP_CODE as code, SALARY AS salary FROM EMPLOYEE WHERE ID_EMP = ?', [req.params.id], (err, rows, fields)=>{
         if(!err){
             console.log( rows);
             res.status(200).send(rows);
@@ -64,6 +63,7 @@ app.get('/employees/:id' , (req, res) =>{
 
 //DELETE  EMPLOYEES/1
 app.delete('/employees/:id' , (req, res) =>{
+    console.log('delete: ', req.params.id);
     mysqlConn.query('DELETE FROM EMPLOYEE WHERE ID_EMP = ?', [req.params.id], (err, rows, fields)=>{
         if(!err){
             console.log( rows);
@@ -79,10 +79,11 @@ app.delete('/employees/:id' , (req, res) =>{
 //Insert an employees
 app.post('/employees', (req, res) => {
     let emp = req.body;
-    console.log(emp);
+    console.log("Post: ", emp);
     var sql = "SET @ID_EMP = ?;SET @NAME = ?;SET @EMP_CODE  = ?;SET @SALARY = ?; \
     CALL EmployeeAddOrEdit(@ID_EMP ,@NAME ,@EMP_CODE ,@SALARY);";
-    mysqlConn.query(sql, [emp.ID_EMP, emp.NAME, emp.EMP_CODE , emp.SALARY], (err, rows, fields) => {
+    //mysqlConn.query(sql, [emp.ID_EMP, emp.NAME, emp.EMP_CODE , emp.SALARY], (err, rows, fields) => {
+        mysqlConn.query(sql, [emp.id, emp.name, emp.code , emp.salary], (err, rows, fields) => {    
         if (!err){
             rows.forEach(element => {
                 if(element.constructor === Array){
@@ -102,9 +103,11 @@ app.post('/employees', (req, res) => {
 //Update an employees
 app.put('/employees', (req, res) => {
     let emp = req.body;
+    console.log('PUT: ', emp);
     var sql = "SET @ID_EMP = ?;SET @NAME = ?;SET @EMP_CODE  = ?;SET @SALARY = ?; \
     CALL EmployeeAddOrEdit(@ID_EMP ,@NAME ,@EMP_CODE ,@SALARY);";
-    mysqlConn.query(sql, [emp.ID_EMP, emp.NAME, emp.EMP_CODE , emp.SALARY], (err, rows, fields) => {
+    //mysqlConn.query(sql, [emp.ID_EMP, emp.NAME, emp.EMP_CODE , emp.SALARY], (err, rows, fields) => {
+        mysqlConn.query(sql, [emp.id, emp.name, emp.code , emp.salary], (err, rows, fields) => {    
         if (!err)
                 res.status(200).send('Updated successfully');
             else{

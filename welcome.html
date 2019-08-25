@@ -47,11 +47,10 @@ crudApp.factory("spaces", function($http) {
         	  method : 'GET'
     	  		}).then( function(response){
 	        	  if (response.data !== null) {
-	        		  //console.log("response: ", response);
-	        		  console.log("response.data: ", response.data);
+	        		  //console.log("response.data: ", response.data);
 	        		  dataResponse =  response.data;
 	        	  } else {
-	        		  console.log("else response.data: ", response.data);
+	        		  //console.log("else response.data: ", response.data);
 	        		  dataResponse =  response.data;
 	        	  }
     	  		});
@@ -65,27 +64,28 @@ crudApp.factory("spaces", function($http) {
     	getUrl(function(urlback){
         	url = urlback;
         });
-        console.log("LEts see all: ", url);
+        //console.log("LEts see all: ", url);
         $http({
         	  url : url,
         	  method : 'GET'
     	  		}).then( function(response){
 	        	  if (response.data !== null) {
-	        		  //console.log("response: ", response);
-	        		  console.log("response.data: ", response.data);
+	        		  //console.log("response.data: ", response.data);
+	        		  callback(response.data);
 	        		  dataResponse =  response.data;
 	        	  } else {
-	        		  console.log("else response.data: ", response.data);
+	        		  //console.log("else response.data: ", response.data);
+	        		  callback(response.data);
 	        		  dataResponse =  response.data;
 	        	  }
     	  		});
-       // console.log("dataResponse: ", dataResponse);
+       //console.log("dataResponse: ", dataResponse);
         callback(dataResponse);
     };
 
     return {
       url:getUrl,
-      datas: datas,
+      datas: all,
       setData: function(str) {
         data = str;
       },
@@ -95,51 +95,85 @@ crudApp.factory("spaces", function($http) {
     };
   });//spaces
 
-crudApp.controller("EmployeeListCtrl", function($scope, spaces) {
+crudApp.controller("EmployeeListCtrl", function($http, $scope, spaces) {
     //countries.setData("Im am set in first controller");
    //console.log("Url: ", spaces.url);
    $scope.all = [];
-   spaces.url(function(u){
-    	console.log("1: ", u);
+   $scope.employee= {};
+   $scope.buttonText="Submit";
+   $scope.url ='';
+   $scope.data = ''
+   spaces.url(function(u){	
+    	$scope.url = u;
+    	console.log("1: ", $scope.url);   	
     });
+  // console.log("2.0: ", spaces.datas);
     spaces.datas(function(a){
-    	console.log("2: ", a);
-    	a.map(val =>{
-    		$scope.all.push(val);
-    	});
-    	$scope.employees = $scope.all;
-    	$scope.all.foreach(a=>{
-        	console.log(": ", a);
-        });
+    	$scope.employees = a;
     });
-   
-    
-    
-   /* $scope.saveEmployee = function() {
-		if ($scope.employee.id !== undefined) {
-			Employee.update($scope.employee, function() {
-				$scope.employees = Employee.query();
-				$scope.employee = {};
-				$scope.buttonText="Submit";
-			});
-		} else {
-			Employee.save($scope.employee, function() {
-				$scope.employees = Employee.query();
-				$scope.employee = {};
-			});
-		}
-	}
-
-	$scope.updateEmployeeInit = function(employee) {
+  
+  $scope.saveEmployee = function() {
+	 // console.log("event: ", $event);
+	  console.log("Post save: ", $scope.employee);
+	  $scope.buttonText="Submit";
+	  console.log("Post id: ", $scope.employee.id);
+	  if ($scope.employee.id == undefined || $scope.employee.id==0) {
+		  $scope.employee.id= 0	;
+		  $http.post($scope.url, $scope.employee).success(function(res){
+	          console.log("Post ", res);
+	          spaces.datas(function(a){
+	            	$scope.employees = a;
+	            });
+		  });
+	  } else {
+		  console.log("Is update : ", $scope.employee.id);
+		  $http({
+	            method: "PUT",
+	            url: $scope.url, // link UserLogin with HomeController 
+	            data: $scope.employee
+	         }).then(function (response) {
+	             console.log("Result value is : " + response);
+	             $scope.data  = response.data;
+	             console.log("$scope.data : " +$scope.data);
+	             $scope.employee ={};
+	             $scope.buttonText="Submit";
+	             spaces.datas(function(a){
+	               	$scope.employees = a;
+	               });
+	            /* if (data == 1) {
+	                 //window.location.href = '/Home/dashboard';
+	            	 console.log("Result value is : " + parseInt(response));
+	              }
+	             else {
+	             alert(data);
+	         	}*/
+	         }, function (error) {
+	        	 console.log("Failed ");
+	         });
+	  }
+  };
+  
+  $scope.updateEmployeeInit = function(employee) {
+	  console.log('UPDATE : ', employee);
 		$scope.buttonText="Update";
 		$scope.employee = employee;
 	}
-
-	$scope.deleteEmployee = function(employee) {
-		employee.$delete({id: employee.id}, function() {
-			$scope.employees = Employee.query();
-		});
-	}*/
+  
+  $scope.deleteEmployee = function(employee) {
+	  console.log('DELETE : ', employee);
+	  $scope.employee =employee; 
+	  if ($scope.employee.id == undefined || $scope.employee.id==0) {
+		  console.log("delete impossible with id 0 or employee null ", $scope.employee.id);
+	  }
+	  $http.delete($scope.url+'/'+$scope.employee.id, $scope.employee).success(function(res){
+          console.log("delete ", res);
+          $scope.employee ={};
+          spaces.datas(function(a){
+          	$scope.employees = a;
+          });
+	  });
+	  
+	};
     
   });// EmployeeListCtrl
 </script>
@@ -150,28 +184,29 @@ crudApp.controller("EmployeeListCtrl", function($scope, spaces) {
 	<div class="panel panel-default">
 		<div class="panel-heading">Employees</div>
 		<div class="panel-body">
-			<!-- form class="col-md-4" ng-submit="saveEmployee()">
+			<form class="col-md-4" ng-submit="saveEmployee()">
+			<input type="hidden" name="id" ng-model="employee.id" />
 				<div class="form-group">
 					<label for="employeeName">Employee Name</label> <input type="text"
 						ng-model="employee.name" class="form-control" id="employeeName"
 						placeholder="Employee Name">
 				</div>
 				<div class="form-group">
-					<label for="employeeSalary">Salary</label> <input type="text"
-						ng-model="employee.salary" class="form-control"
+					<label for="employeeSalary">Code</label> <input type="text"
+						ng-model="employee.code" class="form-control"
 						id="employeeSalary" placeholder="Salary">
 				</div>
 
 				<div class="form-group">
-					<label for="employeeDepartment">Department</label> 
+					<label for="employeeDepartment">Salary</label> 
 					<input type="text"
-						ng-model="employee.department" class="form-control"
+						ng-model="employee.salary" class="form-control"
 						id="employeeDepartment" placeholder="Department">
 				</div>
 
 				<button type="submit" class="btn btn-default">{{buttonText}}</button>
 				
-			</form-->
+			</form>
 
 			<div class="table-responsive col-md-6">
 				<table class="table table-striped">
@@ -183,8 +218,8 @@ crudApp.controller("EmployeeListCtrl", function($scope, spaces) {
 					</tr>
 					<tr ng-repeat="employee in employees">
 						<td>{{employee.name}}</td>
+						<td>{{employee.code}}</td>
 						<td>{{employee.salary}}</td>
-						<td>{{employee.department}}</td>
 						<td>
 							<button type="button" class="btn btn-default"
 								ng-click="updateEmployeeInit(employee)">
