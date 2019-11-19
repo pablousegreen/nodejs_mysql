@@ -32,3 +32,15 @@ BEGIN
     SELECT _ID_EMP AS 'ID_EMP';
 
 END
+
+
+
+//to welcome.html client 
+
+http://localhost:8080/wellcome.html
+
+Connect to Nodejs backend :
+nodejs_mysql
+
+1 Run: CrudApp.java like application
+2 open: http://localhost:8080/wellcome.html
