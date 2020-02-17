@@ -1,10 +1,15 @@
 const mysql = require('mysql');
-var express = require('express');
+//class
+const Openpay = require('openpay');
+const express = require('express');
+const request = require('request');
 var app = express();
 const bodyparser = require('body-parser');
+
+app.use(bodyparser.urlencoded({extended:false}));
 app.use(bodyparser.json());
 
-var mysqlConn = mysql.createConnection({
+let mysqlConn = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     //password: 'Open1234',
@@ -32,6 +37,11 @@ app.use(function(req, res, next) {
   });
 
 app.listen(3000, () =>console.log(`App is running on port 3000`));
+
+//basic reponse html file
+app.get('/', (req, res)=>{
+    res.sendFile(__dirname +'/index.html');
+});
 
 //GET ALL EMPLOYEES
 app.get('/employees' , (req, res) =>{
@@ -115,4 +125,77 @@ app.put('/employees', (req, res) => {
                 res.status(400).send('Errror ', err);
             }
     })
+});
+
+
+/***********OPENPAY TEST******** */
+
+app.post('/create_customer', (req, res)=>{
+    let newCustomer = req.body;
+    console.log('WELL see new Customer: ', newCustomer);
+    if(newCustomer === null){
+        res.status(450).send('Customer Null');
+    }
+    //instantiation
+    var openpay = new Openpay('mivwslqokin62ozwknpf', 'sk_1bffa42ba7224a25ba1a72cc80c35d43');
+    openpay.setProductionReady(false);
+    openpay.customers.create(newCustomer, function(error, body) {
+        if(error!== null){
+            res.status(455).send(error);
+        }    // null if no error occurred (status code != 200||201||204)
+        res.status(200).send(body);     // contains the object returned if no error occurred (status code == 200||201||204)
+    });
+
+});
+
+app.post('/new_charge', (req, res)=>{
+    let newCharge = req.body;
+    console.log('WELL see new newCharge: ', newCharge);
+    if(newCharge === null){
+        res.status(450).send('Charge Null');
+    }
+    //instantiation
+    var openpay = new Openpay('mivwslqokin62ozwknpf', 'sk_1bffa42ba7224a25ba1a72cc80c35d43');
+    openpay.setProductionReady(false);
+    openpay.charges.create(newCharge, function (error, body){
+        if(error!== null){
+            res.status(455).send(error);
+        }    // null if no error occurred (status code != 200||201||204)
+        res.status(200).send(body);     // contains the object returned if no error occurred (status code == 200||201||204)
+      });
+});
+
+app.post('/payout', (req, res)=>{
+    let payout = req.body;
+    console.log('WELL see new payout: ', payout);
+    if(payout === null){
+        res.status(450).send('payout Null');
+    }
+    //instantiation
+    var openpay = new Openpay('mivwslqokin62ozwknpf', 'sk_1bffa42ba7224a25ba1a72cc80c35d43');
+    openpay.setProductionReady(false);
+    openpay.payouts.create(payout, function (error, body){
+        if(error!== null){
+            res.status(455).send(error);
+        }    // null if no error occurred (status code != 200||201||204)
+        res.status(200).send(body);     // contains the object returned if no error occurred (status code == 200||201||204)
+      });
+});
+
+
+app.post('/webhooks', (req, res)=>{
+    let webhook_params = req.body;
+    console.log('WELL see new webhooks: ', webhook_params);
+    if(webhook_params === null){
+        res.status(450).send('webhooks Null');
+    }
+    //instantiation
+    var openpay = new Openpay('mivwslqokin62ozwknpf', 'sk_1bffa42ba7224a25ba1a72cc80c35d43');
+    openpay.setProductionReady(false);
+    openpay.webhooks.create(webhook_params, function (error, body, response){
+        if(error!== null){
+            res.status(455).send(error);
+        }    // null if no error occurred (status code != 200||201||204)
+        res.status(200).send(body);     // contains the object returned if no error occurred (status code == 200||201||204)
+      });
 });
