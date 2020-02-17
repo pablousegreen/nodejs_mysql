@@ -7,6 +7,7 @@
  <title>Angular.js Example</title>
  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script>
  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular-route.min.js"></script>
+ 
 
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -22,6 +23,8 @@
 <!-- Latest compiled and minified JavaScript -->
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	
+	
 </head>
 <script type="text/javascript">
 var crudApp = angular.module('crudApp', []);
@@ -30,37 +33,11 @@ crudApp.factory("spaces", function($http) {
     
     function getUrl(callback) {
       var url = 'http://localhost:3000/employees';
-      //console.log("LEts see all: ", url);
-      //cachedData = data;    
       callback(url);
     };
-    
-    var datas = () => {
-    	var url;
-    	var dataResponse;
-    	getUrl(function(urlback){
-        	url = urlback;
-        });
-        console.log("LEts see all: ", url);
-        $http({
-        	  url : url,
-        	  method : 'GET'
-    	  		}).then( function(response){
-	        	  if (response.data !== null) {
-	        		  //console.log("response.data: ", response.data);
-	        		  dataResponse =  response.data;
-	        	  } else {
-	        		  //console.log("else response.data: ", response.data);
-	        		  dataResponse =  response.data;
-	        	  }
-    	  		});
-       // console.log("dataResponse: ", dataResponse);
-        return dataResponse;
-    };
-    
+
     function all(callback){
     	var url;
-    	var dataResponse;
     	getUrl(function(urlback){
         	url = urlback;
         });
@@ -70,17 +47,13 @@ crudApp.factory("spaces", function($http) {
         	  method : 'GET'
     	  		}).then( function(response){
 	        	  if (response.data !== null) {
-	        		  //console.log("response.data: ", response.data);
+	        		  //console.log("GET response.data: ", response.data);
 	        		  callback(response.data);
-	        		  dataResponse =  response.data;
-	        	  } else {
+	        	} else {
 	        		  //console.log("else response.data: ", response.data);
-	        		  callback(response.data);
-	        		  dataResponse =  response.data;
-	        	  }
-    	  		});
-       //console.log("dataResponse: ", dataResponse);
-        callback(dataResponse);
+	        		  callback({});
+	        	}
+    	  	});
     };
 
     return {
@@ -96,8 +69,6 @@ crudApp.factory("spaces", function($http) {
   });//spaces
 
 crudApp.controller("EmployeeListCtrl", function($http, $scope, spaces) {
-    //countries.setData("Im am set in first controller");
-   //console.log("Url: ", spaces.url);
    $scope.all = [];
    $scope.employee= {};
    $scope.buttonText="Submit";
@@ -107,20 +78,17 @@ crudApp.controller("EmployeeListCtrl", function($http, $scope, spaces) {
     	$scope.url = u;
     	console.log("1: ", $scope.url);   	
     });
-  // console.log("2.0: ", spaces.datas);
     spaces.datas(function(a){
     	$scope.employees = a;
     });
   
   $scope.saveEmployee = function() {
-	 // console.log("event: ", $event);
-	  console.log("Post save: ", $scope.employee);
-	  $scope.buttonText="Submit";
+	 $scope.buttonText="Submit";
 	  console.log("Post id: ", $scope.employee.id);
-	  if ($scope.employee.id == undefined || $scope.employee.id==0) {
+	  if ($scope.employee.id === null || $scope.employee.id === undefined || $scope.employee.id===0) {
 		  $scope.employee.id= 0	;
 		  $http.post($scope.url, $scope.employee).success(function(res){
-	          console.log("Post ", res);
+	          console.log("Post res: ", res);
 	          spaces.datas(function(a){
 	            	$scope.employees = a;
 	            });
@@ -132,28 +100,20 @@ crudApp.controller("EmployeeListCtrl", function($http, $scope, spaces) {
 	            url: $scope.url, // link UserLogin with HomeController 
 	            data: $scope.employee
 	         }).then(function (response) {
-	             console.log("Result value is : " + response);
 	             $scope.data  = response.data;
-	             console.log("$scope.data : " +$scope.data);
 	             $scope.employee ={};
 	             $scope.buttonText="Submit";
 	             spaces.datas(function(a){
 	               	$scope.employees = a;
 	               });
-	            /* if (data == 1) {
-	                 //window.location.href = '/Home/dashboard';
-	            	 console.log("Result value is : " + parseInt(response));
-	              }
-	             else {
-	             alert(data);
-	         	}*/
+	            
 	         }, function (error) {
 	        	 console.log("Failed ");
 	         });
 	  }
   };
   
-  $scope.updateEmployeeInit = function(employee) {
+  $scope.updateEmployeeInit = function( employee) {
 	  console.log('UPDATE : ', employee);
 		$scope.buttonText="Update";
 		$scope.employee = employee;
@@ -177,6 +137,7 @@ crudApp.controller("EmployeeListCtrl", function($http, $scope, spaces) {
     
   });// EmployeeListCtrl
 </script>
+<script src="js/well.js"></script>
 <body ng-app="crudApp" ng-controller="EmployeeListCtrl">
 
 	
@@ -221,11 +182,11 @@ crudApp.controller("EmployeeListCtrl", function($http, $scope, spaces) {
 						<td>{{employee.code}}</td>
 						<td>{{employee.salary}}</td>
 						<td>
-							<button type="button" class="btn btn-default"
+							<button type="button" id={{employee.id}} class="btn btn-default btnSave"
 								ng-click="updateEmployeeInit(employee)">
 								<span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
 							</button>
-							<button type="button" class="btn btn-default"
+							<button type="button" id={{employee.id}} class="btn btn-default btnDel"
 								ng-click="deleteEmployee(employee)">
 								<span class="glyphicon glyphicon-remove-circle"
 									aria-hidden="true"></span>
@@ -238,4 +199,29 @@ crudApp.controller("EmployeeListCtrl", function($http, $scope, spaces) {
 	</div>
 
 </body>
+
 </html>
+
+
+<script>
+$(function() {
+  // Handler for .ready() called.
+	const init = function(){
+		console.log('init in jquery');
+		$('.table-responsive .btnSave').on("click", function(event){
+			event.preventDefault();
+			let idev= event.target.id;
+			console.log( "S A V E: ",  idev );
+		});
+		
+		$('.table-responsive .btnDel').on("click", function(event){
+			event.preventDefault();
+			let idev = $(this).attr("id");
+			console.log( "D E L E T E: ", idev );
+		});
+	}
+	
+	init();
+});
+
+</script>
