@@ -210,7 +210,7 @@ $(function() {
 		console.log('init in jquery');
 		$('.table-responsive .btnSave').on("click", function(event){
 			event.preventDefault();
-			let idev= event.target.id;
+			let idev= event.currentTarget.id;
 			console.log( "S A V E: ",  idev );
 		});
 		
